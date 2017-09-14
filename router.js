@@ -15,7 +15,7 @@ function user(request, response) {
 
     if (username.length > 0) {
         // response.setHeader('Content-Type', 'text/plain');
-        response.writeHead(200, {'Content-Type': 'text/plain'});
+        response.writeHead(200, {'Content-Type': 'text/plain'}); 
         response.write('Header\n');
 
         let studentProfile = new Profile(username);
@@ -31,7 +31,7 @@ function user(request, response) {
         });
 
         studentProfile.on('error', (error) => {
-
+            response.write(`${error.message}\n`);
             response.end('Footer\n');
         });
     }
