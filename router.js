@@ -14,16 +14,26 @@ function user(request, response) {
     let username = request.url.replace('/', '');
 
     if (username.length > 0) {
-        response.setHeader('Content-Type', 'text/plain');
+        // response.setHeader('Content-Type', 'text/plain');
+        response.writeHead(200, {'Content-Type': 'text/plain'});
         response.write('Header\n');
 
-        let studentProfile = new Profile('chalkers');
+        let studentProfile = new Profile(username);
         studentProfile.on('end', function(profileJSON) {
-
+            let values = {
+                avatarUrl: profileJSON.gravatar_url,
+                username: profileJSON.profile_name,
+                badges: profileJSON.badges.length,
+                javascriptPoints: profileJSON.points.JavaScript
+            }
+            response.write(`${values.username} has ${values.badges} badges\n`);
+            response.end('Footer\n');
         });
 
-        response.write(`${username}\n`);
-        response.end('Footer\n');
+        studentProfile.on('error', (error) => {
+
+            response.end('Footer\n');
+        });
     }
 }
 
