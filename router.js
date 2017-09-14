@@ -1,12 +1,17 @@
 let Profile = require('./profile.js');
+let renderer = require('./renderer.js');
+let commonHeaders = {'Content-Type': 'text/html'};
 
 function home(request, response) {
     // response.statusCode = 200;
     if (request.url === '/') {
-        response.setHeader('Content-Type', 'text/plain');
-        response.write('Header\n');
-        response.write('Search\n');
-        response.end('Footer\n');
+        if (request.method.toLowerCase() === '') {
+            response.writeHead(200, commonHeaders);
+            renderer.view('header', {}, response);
+            renderer.view('search', {}, response);
+            renderer.view('footer', {}, response);
+            response.end();
+        } else {}
     }
 }
 
@@ -14,9 +19,8 @@ function user(request, response) {
     let username = request.url.replace('/', '');
 
     if (username.length > 0) {
-        // response.setHeader('Content-Type', 'text/plain');
-        response.writeHead(200, {'Content-Type': 'text/plain'}); 
-        response.write('Header\n');
+        response.writeHead(200, commonHeaders);
+        renderer.view('header', {}, response);
 
         let studentProfile = new Profile(username);
         studentProfile.on('end', function(profileJSON) {
@@ -26,13 +30,18 @@ function user(request, response) {
                 badges: profileJSON.badges.length,
                 javascriptPoints: profileJSON.points.JavaScript
             }
-            response.write(`${values.username} has ${values.badges} badges\n`);
-            response.end('Footer\n');
+            // response.write(`${values.username} has ${values.badges} badges\n`);
+            renderer.view('profile', values, response);
+            renderer.view('footer', {}, response);
+            response.end();
         });
 
         studentProfile.on('error', (error) => {
-            response.write(`${error.message}\n`);
-            response.end('Footer\n');
+            renderer.view('error', { errorMessage: error.message }, response);
+            renderer.view('search', {}, response);
+            renderer.view('footer', {}, response);
+
+            response.end();
         });
     }
 }
